@@ -3,7 +3,7 @@ package com.favqsclient.kmm.android.login.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.favqsclient.kmm.login.domain.LoginInteractor
+import com.favqsclient.kmm.domain.Interactor
 
 /**
  *
@@ -11,7 +11,7 @@ import com.favqsclient.kmm.login.domain.LoginInteractor
  * @author Evgeny Chumak
  **/
 class LoginViewModel(
-    private val interactor: LoginInteractor,
+    private val interactor: Interactor,
 ) : ViewModel() {
 
 
