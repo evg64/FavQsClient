@@ -2,6 +2,8 @@ package com.favqsclient.kmm.android.login.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.favqsclient.kmm.data.RepositoryImpl
+import com.favqsclient.kmm.domain.InteractorImpl
 
 /**
  *
@@ -11,7 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 class LoginViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val interactor = com.favqsclient.kmm.domain.InteractorImpl
+        val repository = RepositoryImpl()
+        val interactor = InteractorImpl.invoke(repository)
         return LoginViewModel(interactor = interactor) as T
     }
 }

@@ -1,31 +1,65 @@
 package com.favqsclient.kmm.domain
 
 import com.favqsclient.kmm.data.Repository
-import com.favqsclient.kmm.data.RepositoryImpl
+import com.favqsclient.kmm.data.entitty.ApiError
+import com.favqsclient.kmm.data.entitty.ApiException
+import com.favqsclient.kmm.data.entitty.ApiResponse
+import com.favqsclient.kmm.data.entitty.ApiResponseData
+import com.favqsclient.kmm.data.entitty.ApiSuccess
+import com.favqsclient.kmm.data.entitty.CreateSessionResponseData
 import com.favqsclient.kmm.domain.entity.CreateSessionResultData
 import com.favqsclient.kmm.domain.entity.CreateUserResultData
 import com.favqsclient.kmm.domain.entity.FavQuotesResultData
 import com.favqsclient.kmm.domain.entity.GetUserResultData
+import com.favqsclient.kmm.domain.entity.InvalidField
 import com.favqsclient.kmm.domain.entity.ListQuotesResultData
 import com.favqsclient.kmm.domain.entity.QuoteResultData
 import com.favqsclient.kmm.domain.entity.Result
+import com.favqsclient.kmm.domain.entity.ResultApiError
+import com.favqsclient.kmm.domain.entity.ResultData
+import com.favqsclient.kmm.domain.entity.ResultError
+import com.favqsclient.kmm.domain.entity.ResultException
 import com.favqsclient.kmm.domain.entity.ResultInvalidArguments
 import com.favqsclient.kmm.domain.entity.ResultSuccess
 import com.favqsclient.kmm.domain.entity.SimpleResultData
-import com.favqsclient.kmm.domain.entity.InvalidField
 
 object InteractorImpl : Interactor {
-    val repository: Repository = RepositoryImpl()
+    private data class Env(
+        var repository: Repository? = null
+    )
+
+    private val env = Env()
+
+    operator fun invoke(repository: Repository): Interactor {
+        env.repository = repository
+        return this
+    }
+
+    private fun <T : ApiResponseData, S : ResultData> checkErrors(result: ApiResponse<T>?): ResultError<S>? =
+        when (result) {
+            null -> ResultException(RuntimeException("Repository is null"))
+            is ApiException -> ResultException(result.e)
+            is ApiError -> ResultApiError(result.code, result.message)
+            else -> null
+        }
 
     override suspend fun createSession(login: String, password: String): Result<CreateSessionResultData> {
-        if(login.isEmpty()) {
+        if (login.isEmpty()) {
             return ResultInvalidArguments(listOf(InvalidField("email", "Введите данные для входа")))
         }
 
+        val result = env.repository?.createSession(login, password)
+
+        checkErrors<CreateSessionResponseData, CreateSessionResultData>(result)?.let {
+            return it
+        }
+
+        val data = (result as ApiSuccess).data
+
         return ResultSuccess(
             CreateSessionResultData(
-                login = "login",
-                email = "email"
+                login = data.user,
+                email = data.email
             )
         )
     }
