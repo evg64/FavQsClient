@@ -9,8 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.favqsclient.kmm.Greeting
+import com.favqsclient.kmm.data.Repository
+import com.favqsclient.kmm.data.RepositoryImpl
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    val repository: Repository = RepositoryImpl()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -20,6 +26,15 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     GreetingView(Greeting().greet())
+                }
+            }
+        }
+
+        GlobalScope.launch {
+            val data = repository.getTestPage()
+            setContent {
+                MyApplicationTheme {
+                    GreetingView(data)
                 }
             }
         }
