@@ -4,18 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.favqsclient.kmm.Greeting
-import com.favqsclient.kmm.data.Repository
-import com.favqsclient.kmm.data.RepositoryImpl
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.favqsclient.kmm.android.login.presentation.LoginScreen
+import com.favqsclient.kmm.android.login.presentation.LoginViewModel
+import com.favqsclient.kmm.android.login.presentation.LoginViewModelFactory
 
 class MainActivity : ComponentActivity() {
-    val repository: Repository = RepositoryImpl()
+    private val loginViewModelFactory = LoginViewModelFactory()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,16 +26,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    GreetingView(Greeting().greet())
-                }
-            }
-        }
-
-        GlobalScope.launch {
-            val data = repository.getTestPage()
-            setContent {
-                MyApplicationTheme {
-                    GreetingView(data)
+                    val viewModel: LoginViewModel = viewModel(
+                        viewModelStoreOwner = this,
+                        factory = loginViewModelFactory,
+                    )
+                    LoginScreen(viewModel)
                 }
             }
         }
