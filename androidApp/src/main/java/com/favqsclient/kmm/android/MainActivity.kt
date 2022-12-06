@@ -86,10 +86,11 @@ class MainActivity : ComponentActivity() {
                 MainScreen(
                     viewModel = viewModel,
                     scaffoldState = scaffoldState,
+                    navController = navController,
                 )
             }
             composable(Destinations.DETAILS) {
-
+                Text(text = "Details")
             }
         }
     }

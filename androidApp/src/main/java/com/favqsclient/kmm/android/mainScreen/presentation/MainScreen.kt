@@ -1,6 +1,7 @@
 package com.favqsclient.kmm.android.mainScreen.presentation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +18,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.favqsclient.kmm.android.Destinations
 import com.favqsclient.kmm.android.R
 import com.favqsclient.kmm.android.login.presentation.LoginViewModel
 import com.favqsclient.kmm.android.mainScreen.model.Quote
@@ -32,8 +36,9 @@ import com.favqsclient.kmm.android.mainScreen.model.Quote
 fun MainScreen(
     viewModel: MainScreenViewModel,
     scaffoldState: ScaffoldState,
+    navController: NavHostController,
 ){
-    val quotes = viewModel.getQuotes()
+    val quotes = viewModel.quotes.observeAsState()
     Scaffold(
         topBar = {
             MainTopBar()
@@ -41,14 +46,17 @@ fun MainScreen(
         bottomBar = {
             MainBottomBar()
         }
-    ){
-        QuoteList(quotes)
+    ) {
+        QuoteList(
+            quotes = quotes.value.orEmpty(),
+            navController = navController,
+        )
     }
 }
 
 @Preview
 @Composable
-fun MainTopBar(){
+fun MainTopBar() {
     TopAppBar(
         backgroundColor = Color.White
     ) {
@@ -60,7 +68,7 @@ fun MainTopBar(){
 
 @Preview
 @Composable
-fun MainBottomBar(){
+fun MainBottomBar() {
     BottomNavigation(
         backgroundColor = Color.White,
         contentColor = Color.Black
@@ -94,26 +102,38 @@ val holderFontSizeBig = 15.sp
 val holderFontSizeSmall = 13.sp
 
 @Composable
-fun QuoteList(quotes: List<Quote>) {
+fun QuoteList(
+    quotes: List<Quote>,
+    navController: NavController,
+) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(16.dp),
     ) {
         items(items = quotes) { quote ->
-            QuoteCard(quote = quote)
+            QuoteCard(
+                quote = quote,
+                navController = navController
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun QuoteCard(quote: Quote){
+fun QuoteCard(
+    quote: Quote,
+    navController: NavController,
+) {
     Column(
         modifier = Modifier.padding(
             horizontal = 16.dp,
-            vertical = 12.dp)
+            vertical = 12.dp
+        ).clickable {
+            navController.navigate(Destinations.DETAILS)
+        },
     ) {
-        Row(){
+        Row() {
             Column( verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = quote.body,
