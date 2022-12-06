@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.OutlinedButton
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -32,7 +35,10 @@ import com.favqsclient.kmm.android.R
  **/
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel) {
+fun LoginScreen(
+    viewModel: LoginViewModel,
+    scaffoldState: ScaffoldState,
+) {
     val login: State<String?> = viewModel.login.observeAsState()
     val password: State<String?> = viewModel.password.observeAsState()
     val resources = LocalContext.current.resources
@@ -118,6 +124,28 @@ fun LoginScreen(viewModel: LoginViewModel) {
             Text(
                 text = stringResource(R.string.forgot_password)
             )
+        }
+
+        val action: State<LoginViewModel.Action?> = viewModel.actions.observeAsState()
+        when (val actionValue = action.value) {
+            LoginViewModel.Action.GoToMainPage -> {}
+            LoginViewModel.Action.GoToRegistration -> {}
+            LoginViewModel.Action.GoToForgotPassword -> {}
+            is LoginViewModel.Action.ShowSnackBar -> {
+                val snackbarHostState = scaffoldState.snackbarHostState
+                LaunchedEffect(snackbarHostState) {
+                    val result = snackbarHostState.showSnackbar(
+                        message = actionValue.text,
+                    )
+                    when (result) {
+                        SnackbarResult.Dismissed -> {
+                            viewModel.actions.value = null
+                        }
+                        else -> {}
+                    }
+                }
+            }
+            else -> {}
         }
     }
 }

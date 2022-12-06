@@ -4,16 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.favqsclient.kmm.Greeting
 import com.favqsclient.kmm.android.login.presentation.LoginScreen
 import com.favqsclient.kmm.android.login.presentation.LoginViewModel
 import com.favqsclient.kmm.android.login.presentation.LoginViewModelFactory
+import com.favqsclient.kmm.data.Repository
+import com.favqsclient.kmm.data.RepositoryImpl
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val loginViewModelFactory = LoginViewModelFactory()
@@ -22,15 +26,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
-                Surface(
+                val scaffoldState = rememberScaffoldState()
+                Scaffold(
+                    scaffoldState = scaffoldState,
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    val viewModel: LoginViewModel = viewModel(
-                        viewModelStoreOwner = this,
-                        factory = loginViewModelFactory,
-                    )
-                    LoginScreen(viewModel)
+                    // color = MaterialTheme.colors.background,
+                ) { padding ->
+                    Surface(
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        color = MaterialTheme.colors.background
+                    ) {
+                        val viewModel: LoginViewModel = viewModel(
+                            viewModelStoreOwner = this,
+                            factory = loginViewModelFactory,
+                        )
+                        LoginScreen(viewModel, scaffoldState)
+                    }
                 }
             }
         }
