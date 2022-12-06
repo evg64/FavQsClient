@@ -1,42 +1,98 @@
 package com.favqsclient.kmm.android.mainScreen.presentation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.ChipDefaults.chipColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.favqsclient.kmm.android.R
+import com.favqsclient.kmm.android.login.presentation.LoginViewModel
 import com.favqsclient.kmm.android.mainScreen.model.Quote
+
+/**
+ *
+ *
+ * @author Sergey Ozerny
+ **/
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@Composable
+fun MainScreen(
+    viewModel: MainScreenViewModel,
+    scaffoldState: ScaffoldState,
+){
+    val quotes = viewModel.getQuotes()
+    Scaffold(
+        topBar = {
+            MainTopBar()
+        },
+        bottomBar = {
+            MainBottomBar()
+        }
+    ){
+        QuoteList(quotes)
+    }
+}
 
 @Preview
 @Composable
-fun QuoteCardPreview(){
-    Column(
-        modifier = Modifier.padding(16.dp)
+fun MainTopBar(){
+    TopAppBar(
+        backgroundColor = Color.White
     ) {
-        Text(text = "Новаторы не всегда в чести. Поначалу.")
-        Text(text = "Джон Эдгар Гувер")
-        Row() {
-            Button(
-                onClick = { /*TODO*/ },
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Text(text = "Жизненные цитаты")
-            }
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "новаторство")
-            }
-        }
-
+        IconButton(onClick = { }) { Icon(Icons.Filled.Search, contentDescription = "Поиск", tint = Color.Black ) }
+        Spacer(Modifier.weight(1f, true))
+        IconButton(onClick = { }) {Icon(Icons.Filled.MoreHoriz, contentDescription = "Меню", tint = Color.Black) }
     }
-
 }
+
+@Preview
+@Composable
+fun MainBottomBar(){
+    BottomAppBar(
+        backgroundColor = Color.White
+    ){
+        Row() {
+            Column {
+                IconButton(onClick = {  }) { Icon(painter = painterResource(id = R.drawable.main_icon), contentDescription = "Главная", tint = Color.Black)}
+                Text(text = "Главная")
+            }
+            Spacer(Modifier.weight(1f, true))
+            IconButton(onClick = {  }) { Icon(Icons.Filled.Person, contentDescription = "Личный кабинет", tint = Color.Black)}
+        }
+    }
+}
+
+
 
 val chipBackgroundColor = Color(0F, 0F, 0F, 0.08F)
 val authorTextColor = Color(0F,0F,0F,0.55F)
+val holderFontSizeBig = 15.sp
+val holderFontSizeSmall = 13.sp
+
+@Composable
+fun QuoteList(quotes: List<Quote>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(items = quotes) { quote ->
+            QuoteCard(quote = quote)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -50,11 +106,11 @@ fun QuoteCard(quote: Quote){
             Column( verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = quote.body,
-                    fontSize = 15.sp
+                    fontSize = holderFontSizeBig
                 )
                 Text(
                     text = quote.author,
-                    fontSize = 13.sp,
+                    fontSize = holderFontSizeSmall,
                     color = authorTextColor
                 )
             }
@@ -69,11 +125,17 @@ fun QuoteCard(quote: Quote){
                 ) {
                     Text(
                         text = it,
-                        fontSize = 13.sp
+                        fontSize = holderFontSizeSmall
                     )
                 }
             }
         }
+        Divider(
+            color = chipBackgroundColor,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+        )
     }
 }
 
@@ -93,11 +155,11 @@ fun QuoteCardMock(){
             Column( verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = quote.body,
-                    fontSize = 15.sp
+                    fontSize = holderFontSizeBig
                 )
                 Text(
                     text = quote.author,
-                    fontSize = 13.sp,
+                    fontSize = holderFontSizeSmall,
                     color = authorTextColor
                 )
             }
@@ -112,10 +174,44 @@ fun QuoteCardMock(){
                 ) {
                     Text(
                         text = it,
-                        fontSize = 13.sp
+                        fontSize = holderFontSizeSmall
                     )
                 }
             }
         }
+        Divider(
+            color = chipBackgroundColor,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+        )
     }
 }
+
+
+
+//@Composable
+//fun StartMain(){
+//    Scaffold(
+//        topBar = {
+//            TopAppBar {
+//                IconButton(onClick = { }) {Icon(Icons.Filled.Menu, contentDescription = "Меню") }
+//                Text("METANIT.COM", fontSize = 22.sp)
+//                Spacer(Modifier.weight(1f, true))
+//                IconButton(onClick = { }) { Icon(Icons.Filled.Search, contentDescription = "Поиск" ) }
+//            }
+//        },
+//        bottomBar = {
+//            BottomAppBar{
+//                IconButton(onClick = {  }) { Icon(Icons.Filled.Favorite, contentDescription = "Избранное")}
+//                Spacer(Modifier.weight(1f, true))
+//                IconButton(onClick = {  }) { Icon(Icons.Filled.Info, contentDescription = "Информация о приложении")}
+//            }
+//        }
+//    ){
+//        val quotes = viewModel.getQuotes()
+//        QuoteList(quotes)
+//    }
+//}
+
+
