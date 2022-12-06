@@ -1,12 +1,12 @@
 package com.favqsclient.kmm.data
 
 import com.favqsclient.kmm.data.request.ApiRequest
-import com.favqsclient.kmm.data.response.ApiResponse
-import com.favqsclient.kmm.data.response.ApiResponseData
 import com.favqsclient.kmm.data.request.CreateSessionRequest
-import com.favqsclient.kmm.data.response.CreateSessionResponseData
 import com.favqsclient.kmm.data.request.CreateUserRequest
 import com.favqsclient.kmm.data.request.QuoteType
+import com.favqsclient.kmm.data.response.ApiResponse
+import com.favqsclient.kmm.data.response.ApiResponseData
+import com.favqsclient.kmm.data.response.CreateSessionResponseData
 import com.favqsclient.kmm.data.response.CreateUserResponseData
 import com.favqsclient.kmm.data.response.ErrorResponseData
 import com.favqsclient.kmm.data.response.FavQuotesResponseData
@@ -25,6 +25,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.appendIfNameAbsent
@@ -131,10 +132,17 @@ class RepositoryImpl : Repository {
         private: Boolean,
         hidden: Boolean
     ): ApiResponse<ListQuotesResponseData> {
-
-
-
-        return handleApi(HttpMethod.Get, "${QUOTES_URL}")
+        val uri = URLBuilder(QUOTES_URL)
+        uri.parameters.append("page", page.toString())
+        filter?.let {
+            uri.parameters.append("filter", filter)
+        }
+        type?.let {
+            uri.parameters.append("type", type.name)
+        }
+        uri.parameters.append("private", private.toString())
+        uri.parameters.append("hidden", hidden.toString())
+        return handleApi(HttpMethod.Get, uri.buildString())
     }
 
     override suspend fun getQuote(id: Long): ApiResponse<QuoteResponseData> {

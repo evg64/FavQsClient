@@ -114,9 +114,7 @@ object InteractorImpl : Interactor {
         private: Boolean,
         hidden: Boolean): Result<ListQuotesResultData> {
 
-            val result = env.repository?.listQuotes(
-                page, filter, type, private, hidden
-            )
+        val result = env.repository?.listQuotes(page, filter, type, private, hidden)
 
         checkErrors<ListQuotesResponseData, ListQuotesResultData>(result)?.let {
             return it
