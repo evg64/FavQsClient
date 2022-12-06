@@ -7,6 +7,7 @@ import com.favqsclient.kmm.data.response.ApiResponse
 import com.favqsclient.kmm.data.response.ApiResponseData
 import com.favqsclient.kmm.data.response.CreateSessionResponseData
 import com.favqsclient.kmm.data.response.ListQuotesResponseData
+import com.favqsclient.kmm.data.response.QuoteResponseData
 import com.favqsclient.kmm.domain.entity.CreateSessionResultData
 import com.favqsclient.kmm.domain.entity.CreateUserResultData
 import com.favqsclient.kmm.domain.entity.FavQuotesResultData
@@ -144,21 +145,30 @@ object InteractorImpl : Interactor {
     }
 
     override suspend fun getQuote(id: Long): Result<QuoteResultData> {
-        return ResultSuccess(
-            QuoteResultData(
-                tags = listOf("linux", "programming", "code", "finnish-american"),
-                favorite = false,
-                authorPermalink = "authorPermalink",
-                body = "body",
-                id = 145345,
-                favoritesCount = 0,
-                upVotesCount = 0,
-                downVotesCount = 0,
-                dialogue = false,
-                author = "author",
-                url = "url"
+        val result = repository.getQuote(id)
+        checkErrors<QuoteResponseData, QuoteResultData>(result)?.let {
+            return it
+        }
+
+        result.data?.let {
+            return ResultSuccess(
+                QuoteResultData(
+                    tags = it.tags,
+                    favorite = it.favorite,
+                    authorPermalink = it.authorPermalink,
+                    body = it.body,
+                    id = it.id,
+                    favoritesCount = it.favoritesCount,
+                    upVotesCount = it.upVotesCount,
+                    downVotesCount = it.downVotesCount,
+                    dialogue = it.dialogue,
+                    author = it.author,
+                    url = it.url
+                )
             )
-        )
+        }
+
+        return ResultException(RuntimeException("Unknown error"))
     }
 
     override suspend fun favQuote(id: Long, fav: Boolean): Result<FavQuotesResultData> {

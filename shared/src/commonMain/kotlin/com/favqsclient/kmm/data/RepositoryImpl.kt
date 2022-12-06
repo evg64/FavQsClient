@@ -145,9 +145,8 @@ class RepositoryImpl : Repository {
         return handleApi(HttpMethod.Get, uri.buildString())
     }
 
-    override suspend fun getQuote(id: Long): ApiResponse<QuoteResponseData> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getQuote(id: Long): ApiResponse<QuoteResponseData> =
+        handleApi(HttpMethod.Get, "${QUOTES_URL}/:$id")
 
     override suspend fun favQuote(id: Long, fav: Boolean): ApiResponse<FavQuotesResponseData> {
         TODO("Not yet implemented")
