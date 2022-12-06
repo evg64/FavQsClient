@@ -2,8 +2,11 @@
 <resources>
     <string name="welcome">Добро пожаловать!</string>
     <string name="login_or_email">Логин или email</string>
+    <string name="login">Логин</string>
+    <string name="email">Email</string>
     <string name="password">Пароль</string>
     <string name="enter">Войти</string>
     <string name="registration">Регистрация</string>
+    <string name="signup">Зарегистрироваться</string>
     <string name="forgot_password">Забыли пароль?</string>
 </resources>

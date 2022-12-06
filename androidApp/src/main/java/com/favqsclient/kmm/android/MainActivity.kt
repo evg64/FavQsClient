@@ -25,6 +25,9 @@ import com.favqsclient.kmm.android.login.presentation.LoginViewModelFactory
 import com.favqsclient.kmm.android.mainScreen.presentation.MainScreen
 import com.favqsclient.kmm.android.mainScreen.presentation.MainScreenViewModel
 import com.favqsclient.kmm.android.mainScreen.presentation.MainScreenViewModelFactory
+import com.favqsclient.kmm.android.signup.SignupScreen
+import com.favqsclient.kmm.android.signup.SignupViewModel
+import com.favqsclient.kmm.android.signup.SignupViewModelFactory
 
 class MainActivity : ComponentActivity() {
     private val loginViewModelFactory = LoginViewModelFactory()
@@ -65,7 +68,11 @@ class MainActivity : ComponentActivity() {
                 LoginScreen(viewModel, scaffoldState, navController)
             }
             composable(Destinations.REGISTRATION) {
-                TODO("Implement me")
+                val viewModel: SignupViewModel = viewModel(
+                    viewModelStoreOwner = this@MainActivity,
+                    factory = SignupViewModelFactory()
+                )
+                SignupScreen(viewModel, scaffoldState, navController)
             }
             composable(Destinations.FORGOT_PASSWORD) {
                 TODO("Implement me")
