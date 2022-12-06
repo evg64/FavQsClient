@@ -25,8 +25,8 @@ class LoginViewModel(
 
     private val _actions = SingleLiveEvent<Action>()
     val actions: MutableLiveData<Action> = _actions
-    private val _login = MutableLiveData<String>()
-    private val _password = MutableLiveData<String>()
+    private val _login = MutableLiveData<String>("kmm2022")
+    private val _password = MutableLiveData<String>("kmmIsSuper")
     val login: LiveData<String> = _login
     val password: LiveData<String> = _password
     private val _isLoginInputError = MutableLiveData(false)

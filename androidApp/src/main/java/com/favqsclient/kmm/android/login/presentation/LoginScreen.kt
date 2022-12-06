@@ -229,12 +229,15 @@ fun HandleActions(
 ) {
     when (val actionValue = action.value) {
         LoginViewModel.Action.GoToMainPage -> {
+            viewModel.actions.value = null
             navController.navigate(Destinations.MAIN_SCREEN)
         }
         LoginViewModel.Action.GoToRegistration -> {
+            viewModel.actions.value = null
             navController.navigate(Destinations.REGISTRATION)
         }
         LoginViewModel.Action.GoToForgotPassword -> {
+            viewModel.actions.value = null
             navController.navigate(Destinations.FORGOT_PASSWORD)
         }
         is LoginViewModel.Action.ShowSnackBar -> {
