@@ -234,11 +234,15 @@ fun HandleActions(
         }
         LoginViewModel.Action.GoToRegistration -> {
             viewModel.actions.value = null
-            navController.navigate(Destinations.REGISTRATION)
+            navController.navigate(Destinations.REGISTRATION){
+                popUpTo(Destinations.LOGIN)
+            }
         }
         LoginViewModel.Action.GoToForgotPassword -> {
             viewModel.actions.value = null
-            navController.navigate(Destinations.FORGOT_PASSWORD)
+            navController.navigate(Destinations.FORGOT_PASSWORD){
+                popUpTo(Destinations.LOGIN)
+            }
         }
         is LoginViewModel.Action.ShowSnackBar -> {
             ShowSnackBar(scaffoldState.snackbarHostState, actionValue, viewModel.actions)

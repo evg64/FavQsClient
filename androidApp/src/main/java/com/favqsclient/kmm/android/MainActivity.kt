@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
             composable(Destinations.DETAILS) {
-                Text(text = "Details")
+                TODO("Implement me")
             }
         }
     }
