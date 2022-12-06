@@ -22,9 +22,13 @@ import androidx.navigation.compose.rememberNavController
 import com.favqsclient.kmm.android.login.presentation.LoginScreen
 import com.favqsclient.kmm.android.login.presentation.LoginViewModel
 import com.favqsclient.kmm.android.login.presentation.LoginViewModelFactory
+import com.favqsclient.kmm.android.mainScreen.presentation.MainScreen
+import com.favqsclient.kmm.android.mainScreen.presentation.MainScreenViewModel
+import com.favqsclient.kmm.android.mainScreen.presentation.MainScreenViewModelFactory
 
 class MainActivity : ComponentActivity() {
     private val loginViewModelFactory = LoginViewModelFactory()
+    private val mainScreenViewModelFactory = MainScreenViewModelFactory()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +71,14 @@ class MainActivity : ComponentActivity() {
                 TODO("Implement me")
             }
             composable(Destinations.MAIN_SCREEN) {
-
+                val viewModel: MainScreenViewModel = viewModel(
+                    viewModelStoreOwner = this@MainActivity,
+                    factory = mainScreenViewModelFactory,
+                )
+                MainScreen(
+                    viewModel = viewModel,
+                    scaffoldState = scaffoldState,
+                )
             }
             composable(Destinations.DETAILS) {
 

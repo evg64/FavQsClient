@@ -15,8 +15,7 @@ import com.favqsclient.kmm.domain.InteractorImpl
 class MainScreenViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val repository = RepositoryImpl()
-        val interactor = InteractorImpl.invoke(repository)
+        val interactor = InteractorImpl
         return MainScreenViewModel(interactor = interactor) as T
     }
 }
