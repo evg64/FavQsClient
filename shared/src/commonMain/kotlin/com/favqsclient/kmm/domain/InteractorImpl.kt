@@ -1,9 +1,11 @@
 package com.favqsclient.kmm.domain
 
 import com.favqsclient.kmm.data.Repository
-import com.favqsclient.kmm.data.entitty.ApiResponse
-import com.favqsclient.kmm.data.entitty.ApiResponseData
-import com.favqsclient.kmm.data.entitty.CreateSessionResponseData
+import com.favqsclient.kmm.data.request.QuoteType
+import com.favqsclient.kmm.data.response.ApiResponse
+import com.favqsclient.kmm.data.response.ApiResponseData
+import com.favqsclient.kmm.data.response.CreateSessionResponseData
+import com.favqsclient.kmm.data.response.ListQuotesResponseData
 import com.favqsclient.kmm.domain.entity.CreateSessionResultData
 import com.favqsclient.kmm.domain.entity.CreateUserResultData
 import com.favqsclient.kmm.domain.entity.FavQuotesResultData
@@ -96,28 +98,53 @@ object InteractorImpl : Interactor {
         return ResultSuccess(SimpleResultData("OK"))
     }
 
-    override suspend fun listQuotes(): Result<ListQuotesResultData> {
-        return ResultSuccess(
-            ListQuotesResultData(
-                page = 1,
-                lastPage = true,
-                quotes = listOf(
-                    QuoteResultData(
-                        tags = listOf("linux", "programming", "code", "finnish-american"),
-                        favorite = false,
-                        authorPermalink = "authorPermalink",
-                        body = "body",
-                        id = 145345,
-                        favoritesCount = 0,
-                        upVotesCount = 0,
-                        downVotesCount = 0,
-                        dialogue = false,
-                        author = "author",
-                        url = "url"
-                    )
+    /**
+     * A list of quotes, paged 25 at a time.
+     * Optional parameters:
+     * @param page    Page number (25 quotes per page), default 1
+     * @param filter    Type lookup or keyword search
+     * @param type    ['author', 'tag', 'user']
+     * @param private Get private quotes for the pro user session (e.g., private=true), default false
+     * @param hidden    Get hidden quotes for the user session (e.g., hidden=true), default false
+     */
+    override suspend fun listQuotes(
+        page: Long,
+        filter: String?,
+        type: QuoteType?,
+        private: Boolean,
+        hidden: Boolean): Result<ListQuotesResultData> {
+
+            val result = env.repository?.listQuotes(
+                page, filter, type, private, hidden
+            )
+
+        checkErrors<ListQuotesResponseData, ListQuotesResultData>(result)?.let {
+            return it
+        }
+
+        result?.data?.let {
+            return ResultSuccess(
+                ListQuotesResultData(
+                    page = it.page,
+                    lastPage = it.lastPage,
+                    quotes = it.quotes.map { quote -> QuoteResultData(
+                        tags = quote.tags,
+                        favorite = quote.favorite,
+                        authorPermalink = quote.authorPermalink,
+                        body = quote.body,
+                        id = quote.id,
+                        favoritesCount = quote.favoritesCount,
+                        upVotesCount = quote.upVotesCount,
+                        downVotesCount = quote.downVotesCount,
+                        dialogue = quote.dialogue,
+                        author = quote.author,
+                        url = quote.url
+                    ) }
                 )
             )
-        )
+        }
+
+        return ResultException(RuntimeException("Unknown error"))
     }
 
     override suspend fun getQuote(id: Long): Result<QuoteResultData> {

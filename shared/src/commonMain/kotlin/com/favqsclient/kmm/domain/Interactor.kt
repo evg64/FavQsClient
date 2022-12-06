@@ -1,5 +1,6 @@
 package com.favqsclient.kmm.domain
 
+import com.favqsclient.kmm.data.request.QuoteType
 import com.favqsclient.kmm.domain.entity.CreateSessionResultData
 import com.favqsclient.kmm.domain.entity.CreateUserResultData
 import com.favqsclient.kmm.domain.entity.FavQuotesResultData
@@ -19,7 +20,21 @@ interface Interactor {
 
     suspend fun forgotPassword(email: String): Result<SimpleResultData>
 
-    suspend fun listQuotes(): Result<ListQuotesResultData>
+    /**
+     * A list of quotes, paged 25 at a time.
+     * Optional parameters:
+     * @param page    Page number (25 quotes per page), default 1
+     * @param filter    Type lookup or keyword search
+     * @param type    ['author', 'tag', 'user']
+     * @param private Get private quotes for the pro user session (e.g., private=true), default false
+     * @param hidden    Get hidden quotes for the user session (e.g., hidden=true), default false
+     */
+    suspend fun listQuotes(
+        page: Long = 1,
+        filter: String?,
+        type: QuoteType?,
+        private: Boolean = false,
+        hidden: Boolean = false): Result<ListQuotesResultData>
     suspend fun getQuote(id: Long): Result<QuoteResultData>
     suspend fun favQuote(id: Long, fav: Boolean): Result<FavQuotesResultData>
 }

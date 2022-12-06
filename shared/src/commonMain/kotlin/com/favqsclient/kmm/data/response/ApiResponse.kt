@@ -1,4 +1,4 @@
-package com.favqsclient.kmm.data.entitty
+package com.favqsclient.kmm.data.response
 
 sealed interface ApiResponse2<T: ApiResponseData>
 

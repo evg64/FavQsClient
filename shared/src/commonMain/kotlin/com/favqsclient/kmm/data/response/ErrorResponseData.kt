@@ -1,4 +1,4 @@
-package com.favqsclient.kmm.data.entitty
+package com.favqsclient.kmm.data.response
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -1,18 +1,19 @@
 package com.favqsclient.kmm.data
 
-import com.favqsclient.kmm.data.entitty.ApiRequest
-import com.favqsclient.kmm.data.entitty.ApiResponse
-import com.favqsclient.kmm.data.entitty.ApiResponseData
-import com.favqsclient.kmm.data.entitty.CreateSessionRequest
-import com.favqsclient.kmm.data.entitty.CreateSessionResponseData
-import com.favqsclient.kmm.data.entitty.CreateUserRequest
-import com.favqsclient.kmm.data.entitty.CreateUserResponseData
-import com.favqsclient.kmm.data.entitty.ErrorResponseData
-import com.favqsclient.kmm.data.entitty.FavQuotesResponseData
-import com.favqsclient.kmm.data.entitty.GetUserResponseData
-import com.favqsclient.kmm.data.entitty.ListQuotesResponseData
-import com.favqsclient.kmm.data.entitty.QuoteResponseData
-import com.favqsclient.kmm.data.entitty.SimpleResponseData
+import com.favqsclient.kmm.data.request.ApiRequest
+import com.favqsclient.kmm.data.response.ApiResponse
+import com.favqsclient.kmm.data.response.ApiResponseData
+import com.favqsclient.kmm.data.request.CreateSessionRequest
+import com.favqsclient.kmm.data.response.CreateSessionResponseData
+import com.favqsclient.kmm.data.request.CreateUserRequest
+import com.favqsclient.kmm.data.request.QuoteType
+import com.favqsclient.kmm.data.response.CreateUserResponseData
+import com.favqsclient.kmm.data.response.ErrorResponseData
+import com.favqsclient.kmm.data.response.FavQuotesResponseData
+import com.favqsclient.kmm.data.response.GetUserResponseData
+import com.favqsclient.kmm.data.response.ListQuotesResponseData
+import com.favqsclient.kmm.data.response.QuoteResponseData
+import com.favqsclient.kmm.data.response.SimpleResponseData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -32,16 +33,10 @@ import kotlinx.serialization.json.Json
 private const val APP_TOKEN = "1c50b74572c520e00fae5e4f8b4c19c1"
 
 private const val BASE_URL = "https://favqs.com/api"
-private const val CREATE_SESSION_URL = "$BASE_URL/session"
-private const val DESTROY_SESSION_URL = "$BASE_URL/session"
-private const val CREATE_USER_URL = "$BASE_URL/users"
-private const val GET_USER_URL = "$BASE_URL/users/:"
-private const val UPDATE_USER_URL = "$BASE_URL/users"
-private const val FORGOT_PASSWORD_URL = "$BASE_URL/qotd"
-private const val LIST_QUOTES_URL = "$BASE_URL/qotd"
-private const val GET_QUOTES_URL = "$BASE_URL/qotd"
-private const val FAV_QUOTES_URL = "$BASE_URL/qotd"
-private const val UNFAV_QUOTES_URL = "$BASE_URL/qotd"
+private const val SESSION_URL = "$BASE_URL/session"
+private const val USER_URL = "$BASE_URL/users"
+private const val FORGOT_PASSWORD_URL = "$USER_URL/forgot_password"
+private const val QUOTES_URL = "$BASE_URL/quotes"
 
 class RepositoryImpl : Repository {
     var client: HttpClient = defaultHttpClient()
@@ -84,7 +79,7 @@ class RepositoryImpl : Repository {
 
     override suspend fun createSession(login: String, password: String): ApiResponse<CreateSessionResponseData> {
         val response = handleApi<CreateSessionResponseData>(
-            HttpMethod.Post, CREATE_SESSION_URL, CreateSessionRequest(
+            HttpMethod.Post, SESSION_URL, CreateSessionRequest(
                 CreateSessionRequest.CreateSessionUserData(login, password)
             )
         )
@@ -96,7 +91,7 @@ class RepositoryImpl : Repository {
 
     override suspend fun destroySession(): ApiResponse<SimpleResponseData> {
         val response = handleApi<SimpleResponseData>(
-            HttpMethod.Delete, DESTROY_SESSION_URL
+            HttpMethod.Delete, SESSION_URL
         )
         response.data?.let {
             token = ""
@@ -110,7 +105,7 @@ class RepositoryImpl : Repository {
         password: String
     ): ApiResponse<CreateUserResponseData> {
         val response = handleApi<CreateUserResponseData>(
-            HttpMethod.Post, CREATE_USER_URL, CreateUserRequest(login, email, password)
+            HttpMethod.Post, USER_URL, CreateUserRequest(login, email, password)
         )
         response.data?.let {
             token = response.data.token
@@ -119,7 +114,7 @@ class RepositoryImpl : Repository {
     }
 
     override suspend fun getUser(login: String): ApiResponse<GetUserResponseData> =
-        handleApi(HttpMethod.Get, "$GET_USER_URL$login")
+        handleApi(HttpMethod.Get, "${USER_URL}/:$login")
 
     override suspend fun updateUser(login: String): ApiResponse<SimpleResponseData> {
         TODO("Not yet implemented")
@@ -129,8 +124,17 @@ class RepositoryImpl : Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun listQuotes(): ApiResponse<ListQuotesResponseData> {
-        TODO("Not yet implemented")
+    override suspend fun listQuotes(
+        page: Long,
+        filter: String?,
+        type: QuoteType?,
+        private: Boolean,
+        hidden: Boolean
+    ): ApiResponse<ListQuotesResponseData> {
+
+
+
+        return handleApi(HttpMethod.Get, "${QUOTES_URL}")
     }
 
     override suspend fun getQuote(id: Long): ApiResponse<QuoteResponseData> {
