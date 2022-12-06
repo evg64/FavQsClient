@@ -31,7 +31,9 @@ object InteractorImpl : Interactor {
     private val env = Env()
 
     operator fun invoke(repository: Repository): Interactor {
+        println("InteractorImpl invoke $repository")
         env.repository = repository
+        println("InteractorImpl invoked ${env.repository}")
         return this
     }
 
@@ -44,6 +46,9 @@ object InteractorImpl : Interactor {
         }
 
     override suspend fun createSession(login: String, password: String): Result<CreateSessionResultData> {
+
+        println("createSession $login")
+
         if (login.isEmpty()) {
             return ResultInvalidArguments(listOf(InvalidField("email", "Введите данные для входа")))
         }
@@ -51,6 +56,7 @@ object InteractorImpl : Interactor {
         val result = env.repository?.createSession(login, password)
 
         checkErrors<CreateSessionResponseData, CreateSessionResultData>(result)?.let {
+            println("createSession error")
             return it
         }
 
