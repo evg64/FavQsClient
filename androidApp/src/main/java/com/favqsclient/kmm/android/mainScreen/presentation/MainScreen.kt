@@ -61,17 +61,28 @@ fun MainTopBar(){
 @Preview
 @Composable
 fun MainBottomBar(){
-    BottomAppBar(
-        backgroundColor = Color.White
-    ){
-        Row() {
-            Column {
-                IconButton(onClick = {  }) { Icon(painter = painterResource(id = R.drawable.main_icon), contentDescription = "Главная", tint = Color.Black)}
-                Text(text = "Главная")
-            }
-            Spacer(Modifier.weight(1f, true))
-            IconButton(onClick = {  }) { Icon(Icons.Filled.Person, contentDescription = "Личный кабинет", tint = Color.Black)}
-        }
+    BottomNavigation(
+        backgroundColor = Color.White,
+        contentColor = Color.Black
+    ) {
+        BottomNavigationItem(
+            selected = true,
+            onClick = { /*TODO*/ },
+            label = {Text("Главная")},
+            selectedContentColor = Color.Black,
+            unselectedContentColor = Color.Black.copy(0.4f),
+            alwaysShowLabel = true,
+            icon = { Icon(painter = painterResource(id = R.drawable.main_icon), contentDescription = "Главная", tint = Color.Black)}
+        )
+        BottomNavigationItem(
+            selected = true,
+            onClick = { /*TODO*/ },
+            label = {Text("Личный кабинет")},
+            selectedContentColor = Color.Black,
+            unselectedContentColor = Color.Black.copy(0.4f),
+            alwaysShowLabel = true,
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Личный кабинет", tint = Color.Black)}
+        )
     }
 }
 
@@ -187,31 +198,5 @@ fun QuoteCardMock(){
         )
     }
 }
-
-
-
-//@Composable
-//fun StartMain(){
-//    Scaffold(
-//        topBar = {
-//            TopAppBar {
-//                IconButton(onClick = { }) {Icon(Icons.Filled.Menu, contentDescription = "Меню") }
-//                Text("METANIT.COM", fontSize = 22.sp)
-//                Spacer(Modifier.weight(1f, true))
-//                IconButton(onClick = { }) { Icon(Icons.Filled.Search, contentDescription = "Поиск" ) }
-//            }
-//        },
-//        bottomBar = {
-//            BottomAppBar{
-//                IconButton(onClick = {  }) { Icon(Icons.Filled.Favorite, contentDescription = "Избранное")}
-//                Spacer(Modifier.weight(1f, true))
-//                IconButton(onClick = {  }) { Icon(Icons.Filled.Info, contentDescription = "Информация о приложении")}
-//            }
-//        }
-//    ){
-//        val quotes = viewModel.getQuotes()
-//        QuoteList(quotes)
-//    }
-//}
 
 
