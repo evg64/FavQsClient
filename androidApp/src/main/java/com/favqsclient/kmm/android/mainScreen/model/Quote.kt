@@ -1,4 +1,4 @@
-package com.favqsclient.kmm.android.model
+package com.favqsclient.kmm.android.mainScreen.model
 
 data class Quote(
     val id: Int,
