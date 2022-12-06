@@ -19,6 +19,7 @@ import com.favqsclient.kmm.domain.entity.ResultApiError
 import com.favqsclient.kmm.domain.entity.ResultData
 import com.favqsclient.kmm.domain.entity.ResultError
 import com.favqsclient.kmm.domain.entity.ResultException
+import com.favqsclient.kmm.domain.entity.ResultInputLoginArguments
 import com.favqsclient.kmm.domain.entity.ResultInvalidArguments
 import com.favqsclient.kmm.domain.entity.ResultSuccess
 import com.favqsclient.kmm.domain.entity.SimpleResultData
@@ -35,8 +36,12 @@ object InteractorImpl : Interactor {
     }
 
     override suspend fun createSession(login: String, password: String): Result<CreateSessionResultData> {
-        if (login.isEmpty()) {
+        if (login.isEmpty() && password.isEmpty()) {
+            return ResultInputLoginArguments()
+        } else if (login.isEmpty()) {
             return ResultInvalidArguments(listOf(InvalidField("email", "Введите данные для входа")))
+        } else if (password.isEmpty()) {
+            return ResultInvalidArguments(listOf(InvalidField("password", "Введите данные для входа")))
         }
 
         val result = repository.createSession(login, password)

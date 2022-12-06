@@ -1,14 +1,16 @@
 package com.favqsclient.kmm.android.login.presentation
 
-import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHostState
@@ -20,11 +22,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +75,7 @@ fun LoginScreen(
                 )
             )
         )
-        LoginPassword(login, viewModel, resources, password)
+        LoginPassword(login, viewModel, password)
         LoginRegisterButtons(viewModel)
         OutlinedButton(
             onClick = { viewModel.onForgetPassword() },
@@ -86,41 +91,104 @@ fun LoginScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginPassword(
     login: State<String?>,
     viewModel: LoginViewModel,
-    resources: Resources,
     password: State<String?>
 ) {
+    val isLoginInputError = viewModel.isLoginInputError.observeAsState()
+    val isPasswordInputError = viewModel.isPasswordInputError.observeAsState()
+    val isLoginError = isLoginInputError.value == true
     TextField(
         value = login.value.orEmpty(),
         onValueChange = { viewModel.onLoginChanged(it) },
-        placeholder = { Text(resources.getString(R.string.login_or_email)) },
+        placeholder = {
+            PlaceholderText(
+                text = stringResource(R.string.login_or_email),
+                isError = isLoginError,
+            )
+        },
         modifier = Modifier.padding(
             top = 16.dp,
             bottom = 16.dp,
-        ).fillMaxWidth(),
+        ).fillMaxWidth()
+            .background(
+                color = if (isLoginError) {
+                    wrongFieldBackgroundColor
+                } else {
+                    MaterialTheme.colors.background
+                }
+            ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
     )
+    val isPasswordError = isPasswordInputError.value == true
+    val keyboardController = LocalSoftwareKeyboardController.current
     TextField(
         value = password.value.orEmpty(),
         onValueChange = { viewModel.onPasswordChanged(it) },
-        placeholder = { Text(resources.getString(R.string.password)) },
+        placeholder = {
+            PlaceholderText(
+                text = stringResource(R.string.password),
+                isError = isPasswordInputError.value == true
+            )
+        },
         visualTransformation = PasswordVisualTransformation(),
         modifier = Modifier.padding(
             top = 16.dp,
             bottom = 16.dp,
-        ).fillMaxWidth(),
+        ).fillMaxWidth()
+            .background(
+                color = if (isPasswordInputError.value == true) {
+                    wrongFieldBackgroundColor
+                } else {
+                    MaterialTheme.colors.background
+                }
+            ),
+        textStyle = LocalTextStyle.current.merge(
+            TextStyle(
+                color = if (isPasswordError) {
+                    wrongFieldTextColor
+                } else {
+                    LocalTextStyle.current.color
+                }
+            )
+        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide()
+                viewModel.onLoginClick()
+            }
+        )
     )
 }
 
 @Composable
+fun PlaceholderText(text: String, isError: Boolean) {
+    Text(
+        text = text,
+        color = if (isError) {
+            wrongFieldTextColor
+        } else {
+            LocalTextStyle.current.color
+        },
+    )
+}
+
+@Composable
+@OptIn(ExperimentalComposeUiApi::class)
 fun LoginRegisterButtons(viewModel: LoginViewModel) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     Row(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Button(
-            onClick = { viewModel.onLoginClick() },
+            onClick = {
+                keyboardController?.hide()
+                viewModel.onLoginClick()
+            },
             modifier = Modifier.weight(1f)
                 .padding(
                     top = 16.dp,
@@ -194,3 +262,19 @@ fun ShowSnackBar(
         }
     }
 }
+
+val wrongFieldBackgroundColor = Color(
+    red = 250,
+    green = 109,
+    blue = 32,
+    alpha = 110,
+)
+
+/**
+ * #E35502
+ */
+val wrongFieldTextColor = Color(
+    red = 0xE3,
+    green = 0x55,
+    blue = 0x02,
+)
