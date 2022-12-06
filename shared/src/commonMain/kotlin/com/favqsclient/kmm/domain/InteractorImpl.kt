@@ -1,11 +1,8 @@
 package com.favqsclient.kmm.domain
 
 import com.favqsclient.kmm.data.Repository
-import com.favqsclient.kmm.data.entitty.ApiError
-import com.favqsclient.kmm.data.entitty.ApiException
 import com.favqsclient.kmm.data.entitty.ApiResponse
 import com.favqsclient.kmm.data.entitty.ApiResponseData
-import com.favqsclient.kmm.data.entitty.ApiSuccess
 import com.favqsclient.kmm.data.entitty.CreateSessionResponseData
 import com.favqsclient.kmm.domain.entity.CreateSessionResultData
 import com.favqsclient.kmm.domain.entity.CreateUserResultData
@@ -31,24 +28,19 @@ object InteractorImpl : Interactor {
     private val env = Env()
 
     operator fun invoke(repository: Repository): Interactor {
-        println("InteractorImpl invoke $repository")
         env.repository = repository
-        println("InteractorImpl invoked ${env.repository}")
         return this
     }
 
-    private fun <T : ApiResponseData, S : ResultData> checkErrors(result: ApiResponse<T>?): ResultError<S>? =
-        when (result) {
-            null -> ResultException(RuntimeException("Repository is null"))
-            is ApiException -> ResultException(result.e)
-            is ApiError -> ResultApiError(result.code, result.message)
-            else -> null
+    private fun <T : ApiResponseData, S : ResultData> checkErrors(result: ApiResponse<T>?): ResultError<S>? {
+        if (result == null) return ResultException(RuntimeException("Repository is null"))
+        if (result.errorData != null) {
+            return ResultApiError(result.errorData.code, result.errorData.message)
         }
+        return null
+    }
 
     override suspend fun createSession(login: String, password: String): Result<CreateSessionResultData> {
-
-        println("createSession $login")
-
         if (login.isEmpty()) {
             return ResultInvalidArguments(listOf(InvalidField("email", "Введите данные для входа")))
         }
@@ -56,18 +48,19 @@ object InteractorImpl : Interactor {
         val result = env.repository?.createSession(login, password)
 
         checkErrors<CreateSessionResponseData, CreateSessionResultData>(result)?.let {
-            println("createSession error")
             return it
         }
 
-        val data = (result as ApiSuccess).data
-
-        return ResultSuccess(
-            CreateSessionResultData(
-                login = data.user,
-                email = data.email
+        result?.data?.let {
+            return ResultSuccess(
+                CreateSessionResultData(
+                    login = it.login,
+                    email = it.email
+                )
             )
-        )
+        }
+
+        return ResultException(RuntimeException("Unknown error"))
     }
 
     override suspend fun destroySession(): Result<SimpleResultData> {

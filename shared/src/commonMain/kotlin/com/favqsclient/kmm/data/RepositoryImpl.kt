@@ -1,13 +1,13 @@
 package com.favqsclient.kmm.data
 
-import com.favqsclient.kmm.data.entitty.ApiException
 import com.favqsclient.kmm.data.entitty.ApiRequest
 import com.favqsclient.kmm.data.entitty.ApiResponse
 import com.favqsclient.kmm.data.entitty.ApiResponseData
-import com.favqsclient.kmm.data.entitty.ApiSuccess
 import com.favqsclient.kmm.data.entitty.CreateSessionRequest
 import com.favqsclient.kmm.data.entitty.CreateSessionResponseData
+import com.favqsclient.kmm.data.entitty.CreateUserRequest
 import com.favqsclient.kmm.data.entitty.CreateUserResponseData
+import com.favqsclient.kmm.data.entitty.ErrorResponseData
 import com.favqsclient.kmm.data.entitty.FavQuotesResponseData
 import com.favqsclient.kmm.data.entitty.GetUserResponseData
 import com.favqsclient.kmm.data.entitty.ListQuotesResponseData
@@ -16,66 +16,92 @@ import com.favqsclient.kmm.data.entitty.SimpleResponseData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.headers
-import io.ktor.client.request.post
+import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.appendIfNameAbsent
 import kotlinx.serialization.json.Json
 
+private const val APP_TOKEN = "1c50b74572c520e00fae5e4f8b4c19c1"
+
 private const val BASE_URL = "https://favqs.com/api"
-private const val CREATE_SESSION_URL = "$BASE_URL/qotd"
-private const val DESTROY_SESSION_URL = "$BASE_URL/qotd"
-private const val CREATE_USER_URL = "$BASE_URL/qotd"
-private const val GET_USER_URL = "$BASE_URL/qotd"
-private const val UPDATE_USER_URL = "$BASE_URL/qotd"
+private const val CREATE_SESSION_URL = "$BASE_URL/session"
+private const val DESTROY_SESSION_URL = "$BASE_URL/session"
+private const val CREATE_USER_URL = "$BASE_URL/users"
+private const val GET_USER_URL = "$BASE_URL/users/:"
+private const val UPDATE_USER_URL = "$BASE_URL/users"
 private const val FORGOT_PASSWORD_URL = "$BASE_URL/qotd"
 private const val LIST_QUOTES_URL = "$BASE_URL/qotd"
 private const val GET_QUOTES_URL = "$BASE_URL/qotd"
 private const val FAV_QUOTES_URL = "$BASE_URL/qotd"
 private const val UNFAV_QUOTES_URL = "$BASE_URL/qotd"
 
-private const val USER_TOKEN_HEADER = "User-Token"
-
 class RepositoryImpl : Repository {
     var client: HttpClient = defaultHttpClient()
     var token: String = ""
 
-    private suspend inline fun <reified T : ApiResponseData> handleApiPost(
-        url: String, bodyRequest: ApiRequest? = null
+    private suspend inline fun <reified T : ApiResponseData> handleApi(
+        method: HttpMethod, url: String, bodyRequest: ApiRequest? = null
     ): ApiResponse<T> {
-        println("handleApiPost")
-        val response: HttpResponse = client.post(url) {
+        val block: HttpRequestBuilder.() -> Unit = {
+            this.method = method
             contentType(ContentType.Application.Json)
+            headers {
+                appendIfNameAbsent("Authorization", "Token token=\"$APP_TOKEN\"")
+                if (token.isNotEmpty()) {
+                    appendIfNameAbsent("User-Token", token)
+                }
+            }
             bodyRequest?.let {
                 setBody(it)
             }
         }
-        println("status " + response.status)
+        val response: HttpResponse = client.request(url, block)
+
         when (response.status.value) {
             200 -> {
-                val data: T = response.body()
-                println("success response $data")
-                return ApiSuccess(data)
+                return try {
+                    val data: T = response.body()
+                    ApiResponse(data)
+                } catch (e: Exception) {
+                    val error: ErrorResponseData = response.body()
+                    ApiResponse(errorData = error)
+                }
             }
             in 300..399 -> println(response.bodyAsText())
             in 400..499 -> println(response.bodyAsText())
             in 500..599 -> println(response.bodyAsText())
         }
-        return ApiException(RuntimeException(response.bodyAsText()))
+        return ApiResponse()
     }
 
-    override suspend fun createSession(login: String, password: String): ApiResponse<CreateSessionResponseData> =
-        handleApiPost(CREATE_SESSION_URL, CreateSessionRequest(
-            CreateSessionRequest.CreateSessionUserData(login, password)
-        ))
+    override suspend fun createSession(login: String, password: String): ApiResponse<CreateSessionResponseData> {
+        val response = handleApi<CreateSessionResponseData>(
+            HttpMethod.Post, CREATE_SESSION_URL, CreateSessionRequest(
+                CreateSessionRequest.CreateSessionUserData(login, password)
+            )
+        )
+        response.data?.let {
+            token = response.data.token
+        }
+        return response
+    }
 
     override suspend fun destroySession(): ApiResponse<SimpleResponseData> {
-        TODO("Not yet implemented")
+        val response = handleApi<SimpleResponseData>(
+            HttpMethod.Delete, DESTROY_SESSION_URL
+        )
+        response.data?.let {
+            token = ""
+        }
+        return response
     }
 
     override suspend fun createUser(
@@ -83,26 +109,17 @@ class RepositoryImpl : Repository {
         email: String,
         password: String
     ): ApiResponse<CreateUserResponseData> {
-        val response: CreateUserResponseData = client.get(CREATE_USER_URL) {
-            if (token.isNotEmpty()) {
-                headers {
-                    append(USER_TOKEN_HEADER, token)
-                }
-            }
-        }.body()
-        return ApiSuccess(response)
+        val response = handleApi<CreateUserResponseData>(
+            HttpMethod.Post, CREATE_USER_URL, CreateUserRequest(login, email, password)
+        )
+        response.data?.let {
+            token = response.data.token
+        }
+        return response
     }
 
-    override suspend fun getUser(login: String): ApiResponse<GetUserResponseData> {
-        client.get(GET_USER_URL) {
-            if (token.isNotEmpty()) {
-                headers {
-                    append(USER_TOKEN_HEADER, token)
-                }
-            }
-        }
-        TODO("Not yet implemented")
-    }
+    override suspend fun getUser(login: String): ApiResponse<GetUserResponseData> =
+        handleApi(HttpMethod.Get, "$GET_USER_URL$login")
 
     override suspend fun updateUser(login: String): ApiResponse<SimpleResponseData> {
         TODO("Not yet implemented")
