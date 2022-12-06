@@ -65,9 +65,11 @@ class RepositoryImpl : Repository {
         when (response.status.value) {
             200 -> {
                 return try {
+                    println("response " + response.bodyAsText())
                     val data: T = response.body()
-                    ApiResponse(data)
+                    ApiResponse(data = data)
                 } catch (e: Exception) {
+                    println("ERRROR")
                     val error: ErrorResponseData = response.body()
                     ApiResponse(errorData = error)
                 }
@@ -143,6 +145,7 @@ class RepositoryImpl : Repository {
         }
         uri.parameters.append("private", private.toString())
         uri.parameters.append("hidden", hidden.toString())
+        println("uri.buildString() ${uri.buildString()}")
         return handleApi(HttpMethod.Get, uri.buildString())
     }
 
@@ -160,6 +163,7 @@ class RepositoryImpl : Repository {
                 json(Json {
                     prettyPrint = true
                     isLenient = true
+                    ignoreUnknownKeys = true
                 })
             }
         }
