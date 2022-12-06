@@ -53,6 +53,7 @@ class SignupViewModel(
                     _actions.value = Action.ShowSnackBar(errorText)
                     println("Api error [${result.code}] ${result.message}")
                 }
+                else -> {}
             }
         }
     }
