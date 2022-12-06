@@ -1,6 +1,7 @@
 package com.favqsclient.kmm.domain
 
 import com.favqsclient.kmm.data.Repository
+import com.favqsclient.kmm.data.RepositoryImpl
 import com.favqsclient.kmm.data.request.QuoteType
 import com.favqsclient.kmm.data.response.ApiResponse
 import com.favqsclient.kmm.data.response.ApiResponseData
@@ -23,16 +24,7 @@ import com.favqsclient.kmm.domain.entity.ResultSuccess
 import com.favqsclient.kmm.domain.entity.SimpleResultData
 
 object InteractorImpl : Interactor {
-    private data class Env(
-        var repository: Repository? = null
-    )
-
-    private val env = Env()
-
-    operator fun invoke(repository: Repository): Interactor {
-        env.repository = repository
-        return this
-    }
+    private val repository: Repository = RepositoryImpl()
 
     private fun <T : ApiResponseData, S : ResultData> checkErrors(result: ApiResponse<T>?): ResultError<S>? {
         if (result == null) return ResultException(RuntimeException("Repository is null"))
@@ -47,13 +39,13 @@ object InteractorImpl : Interactor {
             return ResultInvalidArguments(listOf(InvalidField("email", "Введите данные для входа")))
         }
 
-        val result = env.repository?.createSession(login, password)
+        val result = repository.createSession(login, password)
 
         checkErrors<CreateSessionResponseData, CreateSessionResultData>(result)?.let {
             return it
         }
 
-        result?.data?.let {
+        result.data?.let {
             return ResultSuccess(
                 CreateSessionResultData(
                     login = it.login,
@@ -114,23 +106,24 @@ object InteractorImpl : Interactor {
         private: Boolean,
         hidden: Boolean): Result<ListQuotesResultData> {
 
-        val result = env.repository?.listQuotes(page, filter, type, private, hidden)
+        val result = repository.listQuotes(page, filter, type, private, hidden)
 
         checkErrors<ListQuotesResponseData, ListQuotesResultData>(result)?.let {
             return it
         }
 
-        result?.data?.let {
+        result.data?.let {
             return ResultSuccess(
                 ListQuotesResultData(
                     page = it.page,
                     lastPage = it.lastPage,
-                    quotes = it.quotes.map { quote -> QuoteResultData(
-                        tags = quote.tags,
-                        favorite = quote.favorite,
-                        authorPermalink = quote.authorPermalink,
-                        body = quote.body,
-                        id = quote.id,
+                    quotes = it.quotes.map { quote ->
+                        QuoteResultData(
+                            tags = quote.tags,
+                            favorite = quote.favorite,
+                            authorPermalink = quote.authorPermalink,
+                            body = quote.body,
+                            id = quote.id,
                         favoritesCount = quote.favoritesCount,
                         upVotesCount = quote.upVotesCount,
                         downVotesCount = quote.downVotesCount,
