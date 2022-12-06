@@ -16,6 +16,7 @@ import com.favqsclient.kmm.data.response.QuoteResponseData
 import com.favqsclient.kmm.data.response.SimpleResponseData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.headers
@@ -154,6 +155,7 @@ class RepositoryImpl : Repository {
 
     companion object {
         fun defaultHttpClient() = HttpClient {
+            install(HttpCache)
             install(ContentNegotiation) {
                 json(Json {
                     prettyPrint = true

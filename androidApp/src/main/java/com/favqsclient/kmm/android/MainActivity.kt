@@ -9,11 +9,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -32,6 +30,7 @@ import com.favqsclient.kmm.android.signup.SignupViewModelFactory
 class MainActivity : ComponentActivity() {
     private val loginViewModelFactory = LoginViewModelFactory()
     private val mainScreenViewModelFactory = MainScreenViewModelFactory()
+    private val signupViewModelFactory = SignupViewModelFactory()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +42,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                 ) { padding ->
                     Surface(
-                        modifier = Modifier.fillMaxSize().padding(padding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
                         color = MaterialTheme.colors.background
                     ) {
                         val navController = rememberNavController()
@@ -70,7 +71,7 @@ class MainActivity : ComponentActivity() {
             composable(Destinations.REGISTRATION) {
                 val viewModel: SignupViewModel = viewModel(
                     viewModelStoreOwner = this@MainActivity,
-                    factory = SignupViewModelFactory()
+                    factory = signupViewModelFactory
                 )
                 SignupScreen(viewModel, scaffoldState, navController)
             }
@@ -91,18 +92,5 @@ class MainActivity : ComponentActivity() {
 
             }
         }
-    }
-}
-
-@Composable
-fun GreetingView(text: String) {
-    Text(text = text)
-}
-
-@Preview
-@Composable
-fun DefaultPreview() {
-    MyApplicationTheme {
-        GreetingView("Hello, Android!")
     }
 }
